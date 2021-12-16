@@ -1,0 +1,19 @@
+<mxfile host="65bd71144e">
+    <diagram id="7ccCwSr2hIBkaw5LMg5h" name="第 1 页">
+        <mxGraphModel dx="1304" dy="532" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="EQAaz697ELTbtSdigPdV-1" value="TiKV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="450" width="410" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;span style=&quot;color: rgb(61 , 61 , 61) ; font-family: &amp;#34;arial&amp;#34; , sans-serif&quot;&gt;Redis protocol compatibility cache&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="340" width="410" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="smart data control" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="400" width="410" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

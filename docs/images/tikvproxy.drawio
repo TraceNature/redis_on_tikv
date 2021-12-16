@@ -1,0 +1,52 @@
+<mxfile host="65bd71144e">
+    <diagram id="7ccCwSr2hIBkaw5LMg5h" name="第 1 页">
+        <mxGraphModel dx="1304" dy="532" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="EQAaz697ELTbtSdigPdV-1" value="TiKV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="230.01" y="440" width="521.24" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" parent="1" vertex="1">
+                    <mxGeometry x="230.01" y="270" width="519.99" height="165" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="&lt;br&gt;TikvProxy" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="465.01" y="410" width="40" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="origin Tikv Rust Client" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="237.51" y="350" width="502.49" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="Open APi (Use DSL operate data)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="237.51" y="280" width="502.49" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="golang&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="250" y="160" width="109.99" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="228.76" y="150" width="519.99" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="SDKs" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="468.76" y="230" width="40" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="Golang" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="280" y="160" width="70" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="Rust" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="160" width="70" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="Java" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="160" width="70" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="Python" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="160" width="70" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="&lt;font style=&quot;font-size: 24px&quot;&gt;...&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="600" y="180" width="40" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="C#" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="650" y="160" width="70" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
