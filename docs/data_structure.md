@@ -1,10 +1,14 @@
 # 数据结构
 
+
 * instances 用于防止任务用于实例名相同带来的数据混淆。每次新建相关任务会查询是否有重名
   instances：[instancename,...]
 
 * 头信息用于描述key的属性
+
+  ```
   ^instancename^dbname^keytyp^keyname
+  ```
 
 ## redis 数据结构到 TiKV 的映射关系
 
@@ -14,6 +18,21 @@
 
 * key格式
   instancename^db^l^keyname^index
+
+#### Todo
+
+  - [] 如何解决Lpush问题
+
+rmax 3=1 2=2 3=1
+max 5
+
+if idx < rmax {
+  realindx = rmax - idx +1
+}else{
+  realindx= idx - rmax
+}
+
+异步rebuild
 
 ### hansh
 
