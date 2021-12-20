@@ -1,6 +1,5 @@
 # 数据结构
 
-
 * instances 用于防止任务用于实例名相同带来的数据混淆。每次新建相关任务会查询是否有重名
   instances：[instancename,...]
 
@@ -9,22 +8,27 @@
   ```
   ^instancename^dbname^keytyp^keyname
   ```
-
+  
+//Todo
+//待定 开头字符以及位分隔符
 ## redis 数据结构到 TiKV 的映射关系
 
 总体原则 redis key => instancename^db^type^description^keyname
 
 ### string
 
-     *{instId}_{dbNum}_{commandType}_{keyName}
-
+ *{instId}_{dbNum}_{commandType}_{keyName}
 
 ### list
 
 * key格式
-  instancename^db^l^keyname^index
+  instancename^db^l^keyname^ifrevers^index
   
-        *{instId}_{dbNum}_{commandType}_{keyName}_{index}
+  *{instId}_{dbNum}_{commandType}_{keyName}_{index}
+
+  *redis01_0_l_list01_0_1
+
+  index 0 记录metadata 例如 max 和 rmax
 
 
 #### Todo
