@@ -14,10 +14,18 @@
 
 总体原则 redis key => instancename^db^type^description^keyname
 
+### string
+
+     *{instId}_{dbNum}_{commandType}_{keyName}_{index}
+
+
 ### list
 
 * key格式
   instancename^db^l^keyname^index
+  
+        *{instId}_{dbNum}_{commandType}_{keyName}_{index}
+
 
 #### Todo
 
