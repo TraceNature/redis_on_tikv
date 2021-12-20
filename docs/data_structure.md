@@ -16,7 +16,7 @@
 
 ### string
 
-     *{instId}_{dbNum}_{commandType}_{keyName}_{index}
+     *{instId}_{dbNum}_{commandType}_{keyName}
 
 
 ### list
