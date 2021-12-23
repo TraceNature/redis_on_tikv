@@ -8,7 +8,7 @@
   ```
   ^instancename^dbname^keytyp^keyname
   ```
-  
+
 //Todo
 //待定 开头字符以及位分隔符
 ## redis 数据结构到 TiKV 的映射关系
@@ -48,6 +48,7 @@ if idx < rmax {
 
 ### hansh
 
+
 * key格式
   instancename^db^h^keyname^field
 
@@ -80,4 +81,4 @@ if idx < rmax {
 # ToDo
 
 * 如何scan？rawkv and txn
-如何实现prefix scan
+如何reverse scan
