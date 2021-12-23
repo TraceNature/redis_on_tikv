@@ -50,17 +50,21 @@ if idx < rmax {
 
 
 * key格式
-  instancename^db^h^keyname^field
+  *instancename^db^h^keyname^field
+* value
+  redis value
 
 ### set
 
 * key格式
-  instancename^db^s^keyname^value
+  *instancename^db^s^keyname^value
 
 ### sorted set
 
 * key格式
-  instancename^db^z^keyname^value
+  *instancename^db^z^keyname^number
+* value
+  zset score
 
 ### Bit arrays
 

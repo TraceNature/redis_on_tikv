@@ -44,6 +44,8 @@ pub struct key_in_tikv {
     value: String,
     field: String,
     index: usize,
+    score: f64,
+    number: String,
 }
 
 impl key_in_tikv {
@@ -71,6 +73,12 @@ impl key_in_tikv {
     pub fn index(&self) -> usize {
         self.index
     }
+    pub fn number(&self) -> &str {
+        &self.number
+    }
+    pub fn score(&self) -> f64 {
+        self.score
+    }
 }
 
 impl key_in_tikv {
@@ -84,11 +92,17 @@ impl key_in_tikv {
             name: "".to_string(),
             value: "".to_string(),
             field: "".to_string(),
+            score: 0.0,
+            number: "".to_string(),
         }
     }
 
     pub fn set_value(&mut self, s: String) {
         self.value = s;
+    }
+
+    pub fn set_score(&mut self, score: f64) {
+        self.score = score;
     }
 }
 
@@ -138,7 +152,7 @@ pub fn Key_parser(keystr: &str) -> Result<key_in_tikv> {
         KeyType::str => {
             key.name = String::from(content);
         }
-        KeyType::set | KeyType::zset => {
+        KeyType::set => {
             let (content, key_name) = until_slash(content).map_err(|e| {
                 return ParserError::OptionError(e.to_string());
             })?;
@@ -147,6 +161,17 @@ pub fn Key_parser(keystr: &str) -> Result<key_in_tikv> {
             })?;
             key.name = String::from(key_name);
             key.value = String::from(val);
+        }
+
+        KeyType::zset => {
+            let (content, key_name) = until_slash(content).map_err(|e| {
+                return ParserError::OptionError(e.to_string());
+            })?;
+            let (mumber, _) = header_slash(content).map_err(|e| {
+                return ParserError::OptionError(e.to_string());
+            })?;
+            key.name = String::from(key_name);
+            key.value = String::from(mumber);
         }
         KeyType::list => {
             //解析key 名称
