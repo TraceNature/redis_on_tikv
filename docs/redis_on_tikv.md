@@ -55,7 +55,7 @@
 # 工程项目
 
 * redis to tikv
-  详见[https://github.com/TraceNature/redissyncer-server/tree/dev/RedisToTikvTaskTest.java] 
+  详见[https://github.com/TraceNature/redissyncer-server/blob/dev/syncer-transmission/src/test/syncer/transmission/tikv/RedisToTikvTaskTest.java] 
   测试类，只验证功能
 * tikv to redis
   详见[https://github.com/TraceNature/redis_on_tikv/tree/main/restore]
