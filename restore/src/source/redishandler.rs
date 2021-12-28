@@ -19,13 +19,6 @@ impl redis_handler {
     pub fn send_to_redis(&mut self, key: key_in_tikv) -> Result<(), ParserError> {
         match key.keytype() {
             KeyType::str => {
-                // let mut args = vec![];
-                // args.extend("SET".to_redis_args());
-                // args.extend(key.name().to_redis_args());
-                // args.extend(key.value().to_redis_args());
-                // let cmd = redis::pack_command(&args);
-                // self.conn.send_packed_command(&*cmd);
-
                 self.conn.set(key.name(), key.value()).map_err(|e| {
                     return ParserError::OptionError(e.to_string());
                 })?;

@@ -86,3 +86,12 @@ if idx < rmax {
 
 * 如何scan？rawkv and txn
 如何reverse scan
+
+
+put *redis01_0_w_a a
+put *redis01_0_w_b b
+put *redis01_0_w_c c
+
+put *redis01_0_s_s1 1
+put *redis01_0_s_s2 2
+put *redis01_0_s_s3 3

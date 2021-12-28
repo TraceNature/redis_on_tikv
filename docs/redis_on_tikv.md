@@ -43,5 +43,20 @@
 
 我们希望通过这个项目沉淀出redis to tikv的数据映射关系以及持久化与逆向手段，为产品化打下基础，真正的正的产品在此基础上实现更复杂与庞大的工程，实现reids+tikv 一个真正持久化缓存系统。
 
-hackthon 的项目大多数是精美的电影，我们想做个连续剧。
+## 映射关系应具备的能力
+
+* 尽量从访问层面上兼容redis协议，尽可能广泛的兼容redis现有命令
+* 能够处理redis big key
+* 尽量减少描述性的数据冗余
+* 遍历效率高
+* 多租户
+
+
+# 工程项目
+
+* redis to tikv
+  详见[https://github.com/TraceNature/redissyncer-server/tree/dev/RedisToTikvTaskTest.java] 
+  测试类，只验证功能
+* tikv to redis
+  详见[https://github.com/TraceNature/redis_on_tikv/tree/main/restore]
 

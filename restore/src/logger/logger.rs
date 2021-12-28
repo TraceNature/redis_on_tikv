@@ -39,7 +39,7 @@ pub fn init_log() {
         //     .additive(false)
         //     .build("app::requests", LevelFilter::Info))
         // .build(Root::builder().appender("rolling_file").build(LevelFilter::Debug))
-        .build(Root::builder().appender("stdout").build(LevelFilter::Info))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Error))
         .unwrap();
 
     let _ = log4rs::init_config(config).unwrap();

@@ -1,5 +1,5 @@
 use crate::cmd::requestsample::new_requestsample_cmd;
-use crate::cmd::{new_config_cmd, new_multi_cmd};
+use crate::cmd::{get_ttl_cmd, new_config_cmd, new_get_cmd, new_put_cmd, new_remove_cmd};
 use crate::commons::CommandCompleter;
 use crate::commons::SubCmd;
 
@@ -15,6 +15,8 @@ use std::borrow::Borrow;
 use std::{env, fs, thread};
 
 use crate::cmd::loopcmd::new_loop_cmd;
+use crate::cmd::restore::new_restore_cmd;
+use crate::source::{redis_handler, TiKVHandler};
 use chrono::prelude::Local;
 use fork::{daemon, Fork};
 use std::fs::File;
@@ -25,6 +27,7 @@ use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
 use sysinfo::{System, SystemExt};
+use crate::parser::Key_parser;
 
 const APP_NAME: &str = "restore";
 
@@ -52,7 +55,7 @@ lazy_static! {
             Arg::new("interact")
                 .short('i')
                 .long("interact")
-                .conflicts_with("daemon")
+                .conflicts_with("daemon").help("interact mod")
                 // .about("run as interact mod")
         )
         .arg(
@@ -64,19 +67,12 @@ lazy_static! {
         )
         .subcommand(new_requestsample_cmd())
         .subcommand(new_config_cmd())
-        .subcommand(new_multi_cmd())
-        .subcommand(new_loop_cmd())
-        .subcommand(
-            App::new("test")
-                .about("controls testing features")
-                .version("1.3")
-                .author("Someone E. <someone_else@other.com>")
-                .arg(
-                    Arg::new("debug")
-                        .short('d')
-                        // .about("print debug information verbosely")
-                )
-        );
+        .subcommand(new_put_cmd())
+     .subcommand(new_remove_cmd())
+        .subcommand(new_get_cmd())
+        .subcommand(get_ttl_cmd())
+        .subcommand(new_restore_cmd())
+        .subcommand(new_loop_cmd());
     static ref SUBCMDS: Vec<SubCmd> = subcommands();
 }
 
@@ -109,6 +105,10 @@ pub fn all_subcommand(app: &App, beginlevel: usize, input: &mut Vec<SubCmd>) {
         subcmds.push(iterm.get_name().to_string());
         if iterm.has_subcommands() {
             all_subcommand(iterm, nextlevel, input);
+        } else {
+            if beginlevel == 0 {
+                all_subcommand(iterm, nextlevel, input);
+            }
         }
     }
     let subcommand = SubCmd {
@@ -141,21 +141,7 @@ pub fn process_exists(pid: &i32) -> bool {
 }
 
 fn cmd_match(matches: &ArgMatches) {
-    // let config = get_config().unwrap();
-    // let server = &config["server"];
-    // let req = Request::new(server.clone());
-
     if matches.is_present("daemon") {
-        // // 判断pid是否存才，若后台进程已启动，退出启动过程
-        // if let Ok(buf) = fs::read("pid") {
-        //     let text = String::from_utf8(buf).unwrap();
-        //     let num: i32 = text.parse().unwrap();
-        //     if process_exists(&num) {
-        //         println!("num {}", num);
-        //         // std::process::exit(0);
-        //         return;
-        //     }
-        // };
         let args: Vec<String> = env::args().collect();
         if let Ok(Fork::Child) = daemon(true, true) {
             // 启动子进程
@@ -207,16 +193,6 @@ fn cmd_match(matches: &ArgMatches) {
         }
     }
 
-    // You can check for the existence of subcommands, and if found use their
-    // matches just as you would the top level app
-    if let Some(ref matches) = matches.subcommand_matches("test") {
-        if matches.is_present("debug") {
-            println!("Printing debug info...");
-        } else {
-            println!("Printing normally...");
-        }
-    }
-
     if let Some(ref matches) = matches.subcommand_matches("requestsample") {
         if let Some(_) = matches.subcommand_matches("baidu") {
             let rt = tokio::runtime::Runtime::new().unwrap();
@@ -228,6 +204,141 @@ fn cmd_match(matches: &ArgMatches) {
         };
     }
 
+    if let Some(put) = matches.subcommand_matches("put") {
+        let key = put.value_of("key").unwrap();
+        let val = put.value_of("value").unwrap();
+
+        let pdaddr = vec!["114.67.120.120:2379"];
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        if !put.value_of("ttl").is_none() {
+            let ttl = put.value_of("ttl").unwrap().parse::<u64>().unwrap();
+            println!("ttl is {}", ttl);
+            let future = async {
+                let tikv_handler = TiKVHandler::new(pdaddr).await;
+                tikv_handler
+                    .tikv_put_with_ttl(key.to_string(), val.to_string(), ttl)
+                    .await;
+            };
+            rt.block_on(future);
+            return;
+        }
+        let future = async {
+            let tikv_handler = TiKVHandler::new(pdaddr).await;
+
+            tikv_handler
+                .tikv_put(key.to_string(), val.to_string())
+                .await;
+        };
+        rt.block_on(future);
+    }
+
+    if let Some(get) = matches.subcommand_matches("get") {
+        let key = get.value_of("key").unwrap();
+        let pdaddr = vec!["114.67.120.120:2379"];
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future = async {
+            let tikv_handler = TiKVHandler::new(pdaddr).await;
+            let result = tikv_handler.tikv_get(key.to_string()).await;
+
+            if let Some(val) = result.unwrap() {
+                println!("get key:{},value is:{:?}", key, String::from_utf8(val));
+            }
+        };
+        rt.block_on(future);
+    }
+
+    if let Some(get) = matches.subcommand_matches("remove") {
+        let key = get.value_of("key").unwrap();
+        let pdaddr = vec!["114.67.120.120:2379"];
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future = async {
+            let tikv_handler = TiKVHandler::new(pdaddr).await;
+            tikv_handler.tikv_remove(key.to_string()).await;
+        };
+        rt.block_on(future);
+    }
+
+    if let Some(ttl) = matches.subcommand_matches("ttl") {
+        let key = ttl.value_of("key").unwrap();
+        let pdaddr = vec!["114.67.120.120:2379"];
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future = async {
+            let tikv_handler = TiKVHandler::new(pdaddr).await;
+            let result = tikv_handler.tikv_get_ttl_sec(key.to_string()).await;
+
+            if let Some(val) = result.unwrap() {
+                println!("get key:{},value is:{}", key, val);
+            }
+        };
+        rt.block_on(future);
+    }
+
+    if let Some(restore) = matches.subcommand_matches("redisrestore") {
+
+        //遍历instance_db
+        //解析命令并写入
+
+        let pdaddr = vec!["114.67.120.120:2379"];
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future = async {
+            let tikv_handler = TiKVHandler::new(pdaddr).await;
+            let result = tikv_handler.prefix_scan(
+                "*redis01_0".to_string(), "*redis01_1".to_string(), 100).await;
+
+            if let Ok(kvs) = result {
+                for pair in kvs.iter() {
+                    let key = pair.clone().into_key();
+                    let val = pair.clone().into_value();
+                    let key_str = String::from_utf8(Vec::from(key)).unwrap();
+                    println!("key string is {}", key_str);
+                    let parsed = Key_parser(key_str.as_str());
+                    println!("get key is :{:?} value is:{:?}", parsed, val);
+                }
+            }
+        };
+        rt.block_on(future);
+
+        // let mut urlstr = "redis://".to_string();
+        // let mut host = "";
+        // let mut port = "";
+        // let mut password = "";
+        // let mut dbnumber = "";
+        // if let Some(pass) = restore.value_of("password") {
+        //     urlstr.push_str(":");
+        //     urlstr.push_str(pass);
+        //     urlstr.push_str("@");
+        // }
+        // if let Some(addr) = restore.value_of("addr") {
+        //     urlstr.push_str(addr);
+        // }
+        //
+        // if let Some(p) = restore.value_of("port") {
+        //     urlstr.push_str(":");
+        //     urlstr.push_str(p);
+        // }
+        //
+        // if let Some(db) = restore.value_of("db") {
+        //     urlstr.push_str("/");
+        //     urlstr.push_str(db);
+        // }
+        //
+        // let client = redis::Client::open(urlstr);
+        // if let Err(e) = client {
+        //     println!("{:?}", e);
+        //     return;
+        // }
+        //
+        // let conn = client
+        //     .unwrap()
+        //     .get_connection_with_timeout(Duration::from_secs(2));
+        // if let Err(e) = conn {
+        //     println!("{:?}", e);
+        //     return;
+        // }
+        // let mut handler = redis_handler::new(conn.unwrap());
+        //
+        // println!("{:?}", handler.ping());
+    }
 
     if let Some(config) = matches.subcommand_matches("config") {
         if let Some(show) = config.subcommand_matches("show") {
