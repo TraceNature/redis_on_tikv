@@ -16,6 +16,7 @@ use std::{env, fs, thread};
 
 use crate::cmd::loopcmd::new_loop_cmd;
 use crate::cmd::restore::new_restore_cmd;
+use crate::parser::{Key_parser, KeyType};
 use crate::source::{redis_handler, TiKVHandler};
 use chrono::prelude::Local;
 use fork::{daemon, Fork};
@@ -27,7 +28,6 @@ use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
 use sysinfo::{System, SystemExt};
-use crate::parser::Key_parser;
 
 const APP_NAME: &str = "restore";
 
@@ -49,26 +49,27 @@ lazy_static! {
             Arg::new("daemon")
                 .short('d')
                 .long("daemon")
-                // .about("run as daemon")
+                .help("run as daemon")
+
         )
         .arg(
             Arg::new("interact")
                 .short('i')
                 .long("interact")
-                .conflicts_with("daemon").help("interact mod")
-                // .about("run as interact mod")
-        )
+                .conflicts_with("daemon")
+                .help("interact mod")
+           )
         .arg(
             Arg::new("v")
                 .short('v')
                 .multiple_occurrences(true)
                 .takes_value(true)
-                // .about("Sets the level of verbosity")
+
         )
         .subcommand(new_requestsample_cmd())
         .subcommand(new_config_cmd())
         .subcommand(new_put_cmd())
-     .subcommand(new_remove_cmd())
+        .subcommand(new_remove_cmd())
         .subcommand(new_get_cmd())
         .subcommand(get_ttl_cmd())
         .subcommand(new_restore_cmd())
@@ -274,16 +275,64 @@ fn cmd_match(matches: &ArgMatches) {
     }
 
     if let Some(restore) = matches.subcommand_matches("redisrestore") {
+        let mut urlstr = "redis://".to_string();
+        let mut host = "";
+        let mut port = "";
+        let mut password = "";
+        let mut dbnumber = "";
+        if let Some(pass) = restore.value_of("password") {
+            urlstr.push_str(":");
+            urlstr.push_str(pass);
+            urlstr.push_str("@");
+        }
+        if let Some(addr) = restore.value_of("addr") {
+            urlstr.push_str(addr);
+        }
+
+        if let Some(p) = restore.value_of("port") {
+            urlstr.push_str(":");
+            urlstr.push_str(p);
+        }
+
+        if let Some(db) = restore.value_of("db") {
+            urlstr.push_str("/");
+            urlstr.push_str(db);
+        }
+
+        println!("redis uri is:{}", urlstr);
+        let client = redis::Client::open(urlstr);
+        if let Err(e) = client {
+            println!("{:?}", e);
+            return;
+        }
+
+        // let conn = client
+        //     .unwrap()
+        //     .get_connection_with_timeout(Duration::from_secs(2));
+        let conn = client
+            .unwrap()
+            .get_connection();
+
+        if let Err(e) = conn {
+            println!("{:?}", e);
+            return;
+        }
+
+        let mut redishandler = redis_handler::new(conn.unwrap());
+        if let Err(e) = redishandler.ping() {
+            println!("{:?}", e);
+            return;
+        }
 
         //遍历instance_db
         //解析命令并写入
-
         let pdaddr = vec!["114.67.120.120:2379"];
         let rt = tokio::runtime::Runtime::new().unwrap();
         let future = async {
             let tikv_handler = TiKVHandler::new(pdaddr).await;
-            let result = tikv_handler.prefix_scan(
-                "*redis01_0".to_string(), "*redis01_1".to_string(), 100).await;
+            let result = tikv_handler
+                .prefix_scan("*redis01_0".to_string(), "*redis01_1".to_string(), 100)
+                .await;
 
             if let Ok(kvs) = result {
                 for pair in kvs.iter() {
@@ -292,52 +341,21 @@ fn cmd_match(matches: &ArgMatches) {
                     let key_str = String::from_utf8(Vec::from(key)).unwrap();
                     println!("key string is {}", key_str);
                     let parsed = Key_parser(key_str.as_str());
-                    println!("get key is :{:?} value is:{:?}", parsed, val);
+
+                    if let Ok(mut k) = parsed {
+                        match k.keytype() {
+                            KeyType::str => {
+                                k.set_value(String::from_utf8(val).unwrap());
+                            }
+                            _ => {}
+                        }
+                        redishandler.send_to_redis(k);
+                    };
+                    // println!("get key is :{:?} value is:{:?}", parsed, val);
                 }
             }
         };
         rt.block_on(future);
-
-        // let mut urlstr = "redis://".to_string();
-        // let mut host = "";
-        // let mut port = "";
-        // let mut password = "";
-        // let mut dbnumber = "";
-        // if let Some(pass) = restore.value_of("password") {
-        //     urlstr.push_str(":");
-        //     urlstr.push_str(pass);
-        //     urlstr.push_str("@");
-        // }
-        // if let Some(addr) = restore.value_of("addr") {
-        //     urlstr.push_str(addr);
-        // }
-        //
-        // if let Some(p) = restore.value_of("port") {
-        //     urlstr.push_str(":");
-        //     urlstr.push_str(p);
-        // }
-        //
-        // if let Some(db) = restore.value_of("db") {
-        //     urlstr.push_str("/");
-        //     urlstr.push_str(db);
-        // }
-        //
-        // let client = redis::Client::open(urlstr);
-        // if let Err(e) = client {
-        //     println!("{:?}", e);
-        //     return;
-        // }
-        //
-        // let conn = client
-        //     .unwrap()
-        //     .get_connection_with_timeout(Duration::from_secs(2));
-        // if let Err(e) = conn {
-        //     println!("{:?}", e);
-        //     return;
-        // }
-        // let mut handler = redis_handler::new(conn.unwrap());
-        //
-        // println!("{:?}", handler.ping());
     }
 
     if let Some(config) = matches.subcommand_matches("config") {

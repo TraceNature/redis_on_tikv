@@ -64,18 +64,20 @@ fn fetch_an_integer() -> redis::RedisResult<isize> {
 
 #[cfg(test)]
 mod test {
+    use std::time::Duration;
     use redis::Commands;
     use crate::source::redishandler::{fetch_an_integer, redis_handler};
     use crate::parser::Key_parser;
 
     #[test]
     fn test_fetch_an_integer() {
-        let client = redis::Client::open("redis://:redistest0102@114.67.76.82:16375/0");
+        let client = redis::Client::open("redis://:redistes0102@114.67.76.82:16375/0");
         if let Err(e) = client {
             println!("{:?}", e);
             return;
         }
-        let conn = client.unwrap().get_connection();
+        // let conn = client.unwrap().get_connection();
+        let conn = client.unwrap().get_connection_with_timeout(Duration::from_secs(2));
         if let Err(e) = conn {
             println!("{:?}", e);
             return;
