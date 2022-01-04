@@ -1,4 +1,4 @@
-use tikv_client::{Key, KvPair, RawClient, Error, Value};
+use tikv_client::{Key, KvPair, RawClient, Error, Value, IntoOwnedRange};
 
 pub enum KvPairError {
     OptionError(String),
@@ -24,6 +24,12 @@ impl TiKVHandler {
 
     pub async fn tikv_remove(&self, key: String) -> tikv_client::Result<()> {
         self.tikv_client.delete(Key::from(key)).await
+    }
+
+    pub async fn tikv_remove_all(&self) -> tikv_client::Result<()> {
+        // self.tikv_client.delete(Key::from(key)).await
+        let range = "".."";
+        self.tikv_client.delete_range(range.into_owned()).await
     }
 
     pub async fn tikv_get(&self, key: String) -> tikv_client::Result<Option<Value>> {

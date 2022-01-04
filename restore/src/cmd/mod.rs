@@ -13,6 +13,7 @@ pub use put::new_put_cmd;
 pub use get::new_get_cmd;
 pub use get::get_ttl_cmd;
 pub use remove::new_remove_cmd;
+pub use remove::new_remove_all_cmd;
 pub use requestsample::get_baidu_cmd;
 pub use rootcmd::get_command_completer;
 pub use rootcmd::run_app;

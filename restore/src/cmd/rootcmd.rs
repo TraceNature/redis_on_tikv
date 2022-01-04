@@ -1,5 +1,5 @@
 use crate::cmd::requestsample::new_requestsample_cmd;
-use crate::cmd::{get_ttl_cmd, new_config_cmd, new_get_cmd, new_put_cmd, new_remove_cmd};
+use crate::cmd::{get_ttl_cmd, new_config_cmd, new_get_cmd, new_put_cmd, new_remove_all_cmd, new_remove_cmd};
 use crate::commons::CommandCompleter;
 use crate::commons::SubCmd;
 
@@ -70,6 +70,7 @@ lazy_static! {
         .subcommand(new_config_cmd())
         .subcommand(new_put_cmd())
         .subcommand(new_remove_cmd())
+        .subcommand(new_remove_all_cmd())
         .subcommand(new_get_cmd())
         .subcommand(get_ttl_cmd())
         .subcommand(new_restore_cmd())
@@ -248,13 +249,24 @@ fn cmd_match(matches: &ArgMatches) {
         rt.block_on(future);
     }
 
-    if let Some(get) = matches.subcommand_matches("remove") {
-        let key = get.value_of("key").unwrap();
+    if let Some(remove) = matches.subcommand_matches("remove") {
+        let key = remove.value_of("key").unwrap();
         let pdaddr = vec!["114.67.120.120:2379"];
         let rt = tokio::runtime::Runtime::new().unwrap();
         let future = async {
             let tikv_handler = TiKVHandler::new(pdaddr).await;
             tikv_handler.tikv_remove(key.to_string()).await;
+        };
+        rt.block_on(future);
+    }
+
+    if let Some(removeall) = matches.subcommand_matches("removeall") {
+        let pdaddr = vec!["114.67.120.120:2379"];
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let future = async {
+            let tikv_handler = TiKVHandler::new(pdaddr).await;
+            // tikv_handler.tikv_remove(key.to_string()).await;
+            tikv_handler.tikv_remove_all().await;
         };
         rt.block_on(future);
     }
