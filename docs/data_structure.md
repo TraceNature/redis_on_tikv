@@ -16,7 +16,7 @@
 总体原则 redis key => instancename^db^type^description^keyname
 
 ### string
-
+ *instancename^db^w^keyname
  *{instId}_{dbNum}_{commandType}_{keyName}
 
 ### list
